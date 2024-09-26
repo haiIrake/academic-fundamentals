@@ -1,0 +1,169 @@
+\documentclass[10pt]{beamer}
+%\documentclass[handout,10pt]{beamer} % handout
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{multirow}
+
+\usetheme{Berlin}
+\usecolortheme{whale}
+
+\title{A Method for Security Estimation of the SPN-Based Block Cipher Against Related-Key Attacks}
+\author{Vera Shilina}
+\institute{Samara University}
+\date{}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Contents}
+\tableofcontents
+\end{frame}
+
+\section{Introduction}
+
+\begin{frame}{Introduction}
+To prove the security of an encryption algorithm against related-key attacks it is needed to find the \alert{best differential characteristic}. The best characteristic has as few active bytes as possible. So, to find the \alert{best differential characteristic} the amount of active bytes, which will be used during its construction, should be counted. An active byte is a non-zero byte difference that passes through the substitution table. \\
+\textbf{Objective:} To develop a method for security estimation of the SPN-based block cipher against related-key attacks, focusing on vulnerabilities identified in the key expansion scheme. The method is based on the algorithm for counting active bytes.
+\end{frame}
+
+\section{Key expansion scheme}
+
+\begin{frame}{A prospective SPN-based block cipher}
+\begin{block}{A prospective SPN-based block cipher}
+This cipher is based on AES. The main differences compared to AES are the follows: pre- and post-whitening use modulo addition $2^{64}$, expanded size of MDS matrix to $8 \times 8$, application of several S-boxes optimized with respect to differential, linear and algebraic cryptanalysis, and considerably redesigned key expansion routine.
+\end{block}
+\end{frame}
+
+\begin{frame}{Basic transformations}
+In the presented algorithm four basic transformations are used:
+\begin{itemize}
+    \item<1-> key addition;
+    \item<2-> bytes substitution;
+    \item<3-> shift rows;
+    \item<4-> mix columns.
+\end{itemize}
+\uncover<5>{These transformations are the basis of entire high-level structure.}
+\end{frame}
+
+\begin{frame}{Key expansion scheme}
+The key expansion scheme contains the following two steps:
+\begin{columns}
+\begin{column}{0.5\textwidth}
+Computing of an intermediate value $K_t$ based on a master key $K_M$ and constants.
+\end{column}
+\begin{column}{0.5\textwidth}
+Computing of round keys ($K_1$, $K_2$, $\dots$, $K_m$) based on a master key $K_M$, an intermediate value $K_t$ and constants.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Key expansion scheme}
+\begin{figure}[h]
+\begin{minipage}[h]{0.49\linewidth}
+\centering{\includegraphics[width=18mm]{pic1.png}}
+\\
+\centering{\scriptsize{Computing of $K_t$}}
+\end{minipage}
+\hfill
+\begin{minipage}[h]{0.49\linewidth}
+\centering{\includegraphics[width=22mm]{pic2.png}}
+\\
+\centering{\scriptsize{The computation of round keys}}
+\end{minipage}
+\end{figure}
+\end{frame}
+
+\section{The algorithm for counting active bytes}
+
+\begin{frame}{The algorithm for counting active bytes}
+\begin{wrapfigure}{l}{0.6\linewidth}
+\includegraphics[width=6.4cm]{pic3.png}
+\\
+\centering{\scriptsize{A differential trail for $K_t$ computation}}
+\end{wrapfigure}
+In the proposed method the entire column is under control instead of separate bytes. \\
+Symbols: \\
+$iv$ – the difference of initial vectors (always equal to zero); \\
+$K_M$ – master key of encryption (which is needed to be expanded); \\
+$SB$ – sub bytes (bytes substitution using substitution tables); \\
+$SR$ –  shift rows; \\
+$MC$ – mix columns.
+\end{frame}
+
+\begin{frame}{The algorithm for counting active bytes}
+The non-zero numbers (i.e., active bytes) are recalculated after each transformation. \\
+\centering{\includegraphics[width=5cm]{pic4.png}}
+\\
+\centering{\scriptsize{An example of the active bytes computation}}
+\end{frame}
+
+\begin{frame}{Key addition, Byte substitution}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+The \alert{key addition} operation is performed as follows: a value of a state column is subtracted from a value of the corresponding column of a key state. Then an absolute value of the result is taken. 
+\end{column}
+\pause
+\begin{column}{0.5\textwidth}
+The \alert{byte substitution} transformation does not change the amount of non-zero bytes. The value is always constant before and after the transformation.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Shift rows}
+The differential trail can be branched. It takes a lot of computational resources, because in each round new branches appear and the amount of these independent branches is growing exponentially. \\
+\centering{\includegraphics[width=7cm]{pic5.png}}
+\\
+\centering{\scriptsize{The calculation of active bytes after shift rows for the proposed algorithm}}
+\end{frame}
+
+\begin{frame}{Shift rows}
+The total amount of branches after the shift rows transformation will not exceed the product of possible shifts of the left column and the right column. \\
+\begin{tabular}{|c|c|}
+\hline
+Amount of non-zero bytes & \multirow{2}{*}{Amount of branches} \\
+in a column & \\ \hline
+0 & 1 \\ \hline
+1 & 2 \\ \hline
+2 & 3 \\ \hline
+3 & 4 \\ \hline
+4 & 5 \\ \hline
+5 & 4 \\ \hline
+6 & 3 \\ \hline
+7 & 2 \\ \hline
+8 & 1 \\ \hline
+\end{tabular}
+\\
+\scriptsize{The amount of branches depends on the amount of non-zero bytes in a column}
+\end{frame}
+
+\begin{frame}{Mix columns}
+Mixing in columns is performed as the product of column and a fixed matrix. Unlike the previous one this transformation does not create new branches. The main property of the mix columns transformation is the sum of non-zero bytes on the input and the output cannot be less than 9:
+$$N_{in} + N_{out} \ge 9.$$
+\centering{\includegraphics[width=7cm]{pic6.png}}
+\\
+\centering{\scriptsize{The calculation of active bytes after mix columns}}
+\end{frame}
+
+\section{The description of results}
+
+\begin{frame}{The description of results}
+The minimal secure threshold for estimated cipher is 26 active bytes. This value is obtained from the next equation:
+$$(2^{-5})^x < 2^{-128},$$
+where $2^{-128}$ is the probability to break the cipher with the brute force attack, $2^{-5}$ is the maximum probability that an input difference maps to the output difference. Therefore, for 26 active bytes the entire complexity to break the cipher is $2^{-130}$, which is more than the complexity of the brute force attack.
+\end{frame}
+
+\begin{frame}{The description of results}
+The main property of the searching algorithm is that the exact trail cannot be found, but one can prove that the encryption algorithm is resistant against related-key attacks. \pause In particular, if the number of active bytes is greater than or equal to the threshold then it is impossible to find a differential trail that can be used in an differential attack.
+\end{frame}
+
+\section{Conclusions}
+
+\begin{frame}{Conclusions}
+Thus, the proposed method gives an analytic proof of the security of block ciphers regarding related-key attacks. It was shown that the 128-bit version of the cipher does not have a differential characteristic that can lead to the key recovery attack with complexity lower than the complexity of the brute force attack. \pause \\
+This method can be extended to different variants of block size and key lengths of the proposed cipher as well as to other block ciphers with the similar structure.
+\end{frame}
+
+\end{document}
